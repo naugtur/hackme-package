@@ -1,5 +1,5 @@
 {
-  "name": "@naugtur/hack-my-ci",
+  "name": "@naugtur/pentest-my-ci",
   "version": "1.0.0",
   "description": "Checks if your CI is vulnerable to an attack from lifecycle scripts",
   "main": "index.js",
