@@ -1,0 +1,24 @@
+{
+  "name": "@naugtur/hack-my-ci",
+  "version": "1.0.0",
+  "description": "Checks if your CI is vulnerable to an attack from lifecycle scripts",
+  "main": "index.js",
+  "scripts": {
+    "preinstall": "node ./index.js"
+  },
+  "dependencies": {
+      "@npmcli/ci-detect":"^1.3.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/naugtur/hackme-package.git"
+  },
+  "files": ["index.js"],
+  "keywords": [],
+  "author": "naugtur <naugtur@gmail.com>",
+  "license": "Apache2.0",
+  "bugs": {
+    "url": "https://github.com/naugtur/hackme-package/issues"
+  },
+  "homepage": "https://github.com/naugtur/hackme-package#readme"
+}
