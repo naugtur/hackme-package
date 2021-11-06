@@ -1,10 +1,5 @@
-# Pentest
+# Tools for testing yourself against some attacks
 
-A package that warns you about the risks of installing from npm with the postinstall scripts enabled.
+Currently:
 
-## Usage 
-```
-npm install -D @naugtur/pentest-my-ci
-```
-
-Once installed, the package will break your build if it's not secure and display scary but helpful information.
+- supply chain via postinstall scripts in CI
