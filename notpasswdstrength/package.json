@@ -1,0 +1,14 @@
+{
+  "name": "@selfpentest/notpasswdstrength",
+  "version": "1.1.0",
+  "main": "index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "echo boop"
+  },
+  "author": "selfpentest",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "description": "An example package for training oneself that pretends to be a password strength meter, but then also _pretends_ to send the password off to a hacker"
+}
