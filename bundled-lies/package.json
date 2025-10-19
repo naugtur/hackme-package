@@ -1,21 +1,18 @@
 {
-  "name": "@naugtur/pentest-my-ci",
-  "version": "1.0.2",
-  "description": "Checks if your CI is vulnerable to an attack from lifecycle scripts",
+  "name": "@selfpentest/bundled-lies",
+  "version": "1.0.0",
+  "description": "A tool to verify the safety of a package installation setup",
   "main": "index.js",
-  "scripts": {
-    "postinstall": "node ./index.js"
-  },
   "dependencies": {
-    "@npmcli/ci-detect": "^1.3.0"
+    "bcrypt": "*"
   },
-  "repository": {
+  "bundleDependencies": [
+    "bcrypt"
+  ],
+   "repository": {
     "type": "git",
     "url": "git+https://github.com/naugtur/hackme-package.git"
   },
-  "files": [
-    "index.js"
-  ],
   "keywords": [],
   "author": "naugtur <naugtur@gmail.com>",
   "license": "Apache2.0",
