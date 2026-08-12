@@ -1,14 +1,22 @@
-# Tools for testing yourself against some attacks
+![](./pentest.png)
 
-Currently:
+# SelfPentest
 
-- supply chain via postinstall scripts in CI
+**_Tools for testing yourself against supply-chain attacks_**
 
-## How to defend
 
-> The goal of this repository is not to show things are dangerous, but prove security-related actions need to be taken. 
+package | description
+ --- | ---
+ @selfpentest/pentest-my-ci | Breaks insecure CI installs with a scary postinstall warning.
+ @selfpentest/notpasswdstrength | Pretends to be a password strength package and to leak the password.
+ @selfpentest/bundled-lies | Checks whether your setup will run a made-up package build when you selectively allow lifecycle.
+ @selfpentest/bundled-lies-gyp | Checks whether your setup will run a made-up gyp build when you selectively allow lifecycle.
+ 
+---
 
-You can disable all lifecycle scripts in your package manager configuration. (`pnpm` does it by default since v10)
+### How to defend
 
-Use [@lavamoat/allow-scripts](https://www.npmjs.com/package/@lavamoat/allow-scripts) to safely run the scripts you need and get help configuring your package manager.
+The goal of this repository is not to show things are dangerous, but prove security-related actions need to be taken. 
+
+**Use [@lavamoat/harden](https://lavamoat.github.io/guides/harden/) to configure your project.**
 

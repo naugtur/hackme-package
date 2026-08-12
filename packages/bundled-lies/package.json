@@ -9,6 +9,9 @@
   "bundleDependencies": [
     "bcrypt"
   ],
+  "bundledDependencies": [
+    "bcrypt"
+  ],
    "repository": {
     "type": "git",
     "url": "git+https://github.com/naugtur/hackme-package.git"

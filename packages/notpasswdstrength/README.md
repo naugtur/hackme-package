@@ -18,7 +18,7 @@ const result = checkPasswordStrengthIncorrectly('password123');
 console.log(result); 
 ```
 
-# License
 
-Production use of this software is not allowed. Can be distributed and experimented with freely. See LICENSE.md for jargon.
+## Intent
 
+This package is not a hacking tool. It lets the developer check if their setup is vulnerable and can be used for security demonstrations.
