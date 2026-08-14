@@ -10,6 +10,8 @@ package | description
  @selfpentest/pentest-my-ci | Breaks insecure CI installs with a scary postinstall warning.
  @selfpentest/notpasswdstrength | Pretends to be a password strength package and to leak the password.
  @selfpentest/bundled-lies | Checks whether your setup will run a made-up package build when you selectively allow lifecycle.
+ @selfpentest/eslint-pentest-plugin | Pretends to be an eslint plugin and leaks secrets during linting.
+ @selfpentest/webpack-plugin | Pretends to be a webpack plugin and leaks secrets during the build.
  
 ---
 

