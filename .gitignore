@@ -41,6 +41,9 @@ build/Release
 node_modules/
 !packages/**/node_modules
 
+# verdaccio storage
+_local/storage
+
 jspm_packages/
 
 # TypeScript v1 declaration files

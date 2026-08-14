@@ -1,0 +1,13 @@
+{
+  "name": "@selfpentest/bin-confusion",
+  "version": "1.0.0",
+  "bin": {
+    "npm": "npm.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "selfpentest",
+  "license": "MIT",
+  "description": "An example package for training oneself that uses bin confusion to run a script"
+}

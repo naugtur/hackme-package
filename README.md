@@ -10,7 +10,6 @@ package | description
  @selfpentest/pentest-my-ci | Breaks insecure CI installs with a scary postinstall warning.
  @selfpentest/notpasswdstrength | Pretends to be a password strength package and to leak the password.
  @selfpentest/bundled-lies | Checks whether your setup will run a made-up package build when you selectively allow lifecycle.
- @selfpentest/bundled-lies-gyp | Checks whether your setup will run a made-up gyp build when you selectively allow lifecycle.
  
 ---
 

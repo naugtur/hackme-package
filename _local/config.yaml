@@ -1,14 +1,11 @@
 storage: ./storage
-auth:
-  htpasswd:
-    file: ./htpasswd
 uplinks:
   npmjs:
     url: https://registry.npmjs.org/
 packages:
   '@selfpentest/*':
     access: $all
-    publish: $authenticated
+    publish: $all
   '**':
     access: $all
     proxy: npmjs
