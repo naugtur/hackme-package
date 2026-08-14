@@ -4,12 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "export SECRET='SecreT' && npm run test:lint && npm run test:unit && is-online && npm run test:online",
+    "test": "export SECRET='SecreT' && npm run test:lint && npm run test:unit && npm run test:online",
     "deploy": "export SECRET='ProD' && npm run deploy:build && npm run deploy:publish",
     "deploy:build": "webpack",
     "deploy:publish": "echo publishing && is-online",
     "test:lint": "eslint",
-    "test:unit": "echo 'unit test pass'",
+    "test:unit": "echo 'unit test pass' && (is-online; true) ",
     "test:online": "echo 'online tests' && is-online"
   },
   "keywords": [],

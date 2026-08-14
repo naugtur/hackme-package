@@ -1,0 +1,516 @@
+diff --git a/examples/project-vulnerable/.npmrc b/examples/project-vulnerable/.npmrc
+index c4d89dc..4e1a148 100644
+--- a/examples/project-vulnerable/.npmrc
++++ b/examples/project-vulnerable/.npmrc
+@@ -1 +1,18 @@
+-@selfpentest:registry=http://localhost:4873/
+\ No newline at end of file
++@selfpentest:registry=http://localhost:4873/
++## Avoid installing packages published in last 3 days.
++min-release-age=3
++
++## Don't install packages from git urls.
++allow-git=none
++
++## Disable git entirely (false is a POSIX command that always fails).
++git=false
++
++## Disable installing dependencies from remote URLs.
++allow-remote=none
++
++## Pin allowed scripts to exact versions of dependencies to prevent unexpected script execution.
++allow-scripts-pin=true
++
++## Protect the runtime of calls to "npm run" scripts.
++script-shell=./lavamoat/.runner.cjs
+diff --git a/examples/project-vulnerable/lavamoat/.env.ban.json b/examples/project-vulnerable/lavamoat/.env.ban.json
+new file mode 100644
+index 0000000..aed03c2
+--- /dev/null
++++ b/examples/project-vulnerable/lavamoat/.env.ban.json
+@@ -0,0 +1,8 @@
++[
++  "SSH",
++  "KEY",
++  "TOKEN",
++  "SECRET",
++  "PASSWORD",
++  "AUTH"
++]
+diff --git a/examples/project-vulnerable/lavamoat/.runner.cjs b/examples/project-vulnerable/lavamoat/.runner.cjs
+new file mode 100755
+index 0000000..d182dea
+--- /dev/null
++++ b/examples/project-vulnerable/lavamoat/.runner.cjs
+@@ -0,0 +1,372 @@
++#! /usr/bin/env node
++/// <reference path="../runner/make-run-script-wrapper.global.d.ts" />
++
++/* global makeRunScriptWrapper */
++
++const { spawnSync } = require('node:child_process')
++const fs = require('node:fs')
++const path = require('node:path')
++const { tmpdir } = require('node:os')
++const scriptName = process.env.npm_lifecycle_event
++const scriptPayload = process.argv[3]
++
++const pkgJsonPath = process.env.npm_package_json
++
++if (!pkgJsonPath) {
++  throw Error(
++    `[LavaMoat] FATAL: 'npm_package_json' environment variable is missing. A modern package manager is required.`
++  )
++}
++
++if (!scriptName) {
++  console.error(
++    `[LavaMoat] Warning: 'npm_lifecycle_event' environment variable is missing.`
++  )
++}
++
++const pkgJsonFolder = path.dirname(pkgJsonPath)
++const fallbackShell = process.platform === 'win32' ? 'cmd.exe' : '/bin/sh'
++const shellArgs = process.platform === 'win32' ? ['/d', '/s', '/c'] : ['-c']
++
++const pathBinMatcherString = `node_modules${path.sep}.bin`
++
++const wrapper = makeRunScriptWrapper(
++  {
++    scriptName,
++    scriptPayload,
++    projectRoot: pkgJsonFolder,
++    pathBinMatcher: (fragment) => fragment.endsWith(pathBinMatcherString),
++    customizePermissionsConfig: addMandatoryReads,
++    readScriptsConfig: () => {
++      try {
++        const pkgData = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'))
++        return pkgData.scriptsConfig
++      } catch {
++        return undefined
++      }
++    },
++  },
++  {
++    readFileSync: fs.readFileSync,
++    pathJoin: path.join,
++    pathDelimiter: path.delimiter,
++    tmpdir,
++    realpathSync: fs.realpathSync,
++  }
++)
++
++const customEnv = wrapper.processEnv(process.env)
++
++// Note: spawnSync is used here instead of process.execve because execve is
++// not available on Windows. Leaving this here to switch to execve in case other reasons to
++// drop Windows support arise.
++// process.execve(fallbackShell, [...shellArgs, scriptPayload], customEnv)
++
++const result = spawnSync(fallbackShell, [...shellArgs, scriptPayload], {
++  stdio: 'inherit',
++  env: customEnv,
++  cwd: pkgJsonFolder,
++})
++if (result.error) {
++  console.error(
++    `[LavaMoat wrapper failed to execute "${scriptName}"] ${result.error.message}`
++  )
++}
++if (result && 'status' in result) {
++  process.exit(result.status)
++} else {
++  process.exit(1)
++}
++
++/**
++ * @param {Record<string, boolean | string | string[]>} configOptions
++ * @param {NodeJS.ProcessEnv} _env
++ */
++function addMandatoryReads(configOptions, _env) {
++  if (!configOptions['--permission']) {
++    return
++  }
++  if (!configOptions['--allow-fs-read']) {
++    configOptions['--allow-fs-read'] = []
++  }
++  if (Array.isArray(configOptions['--allow-fs-read'])) {
++    configOptions['--allow-fs-read'].push(
++      '$npm_config_prefix',
++      '$npm_config_userconfig'
++    )
++  }
++}
++
++;;
++/// <reference path="./make-run-script-wrapper.global.d.ts" />
++
++/**
++ * @param {MakeRunScriptWrapperOptions} param0
++ * @param {MakeRunScriptWrapperIO} param1
++ * @returns {MakeRunScriptWrapper}
++ */
++function makeRunScriptWrapper(
++  {
++    scriptName,
++    scriptPayload: _scriptPayload, // might be useful to read in the future
++    projectRoot,
++    pathBinMatcher,
++    customizePermissionsConfig,
++    readScriptsConfig,
++  },
++  { readFileSync, pathJoin, pathDelimiter, tmpdir, realpathSync }
++) {
++  const DEFAULT_PERMISSION_KEY = '#default'
++
++  /** @param {string} filePath */
++  function readJsonFile(filePath) {
++    return JSON.parse(readFileSync(filePath, 'utf8'))
++  }
++
++  /**
++   * @param {object} opts
++   * @param {Record<string, string> | undefined} opts.scriptsConfig
++   * @param {string} [opts.scriptName]
++   * @param {string} opts.projectRoot
++   */
++  function readConfig({
++    scriptsConfig,
++    scriptName = DEFAULT_PERMISSION_KEY,
++    projectRoot,
++  }) {
++    if (!scriptsConfig) {
++      return {}
++    }
++    const configName =
++      scriptsConfig[scriptName] || scriptsConfig[DEFAULT_PERMISSION_KEY]
++
++    // config needs to be optional, because it's opt-in first and specifying a default turns it opt-out.
++    if (!configName) {
++      return {}
++    }
++    const configPath = pathJoin(projectRoot, configName)
++    let conf
++    try {
++      conf = readJsonFile(configPath)
++      if (typeof conf !== 'object' || conf === null) {
++        throw Error(`Expected an object, got ${typeof conf}`)
++      }
++    } catch (err) {
++      const message = err instanceof Error ? err.message : String(err)
++      throw Error(
++        `[LavaMoat] Error loading script config file "${configPath}": ${message}`,
++        { cause: err }
++      )
++    }
++    return conf
++  }
++
++  /**
++   * Adds features we'd want in Node.js permissions model and intend to
++   * eventually upstream
++   *
++   * @param {ConfigOptions} configOptions
++   * @param {NodeJS.ProcessEnv} env
++   * @returns {void}
++   */
++  function permissionsModelCompatibilityExtensions(configOptions, env) {
++    // 1. support env variables as values in allow-fs-*
++    /**
++     * @param {string} value
++     * @returns {string}
++     */
++    const replaceEnvVar = (value) => {
++      const envVarMatch = value.match(/^\$([A-Z_][A-Z0-9_]*)$/i)
++      if (envVarMatch) {
++        const envVarName = envVarMatch[1]
++        if (env[envVarName] !== undefined) {
++          return env[envVarName]
++        } else {
++          console.error(
++            `[LavaMoat] Environment variable "${envVarName}" referenced in config but not found in environment`
++          )
++        }
++      }
++      return value
++    }
++
++    for (const key of ['--allow-fs-read', '--allow-fs-write']) {
++      if (Array.isArray(configOptions[key])) {
++        configOptions[key] = configOptions[key].map(replaceEnvVar)
++      }
++    }
++
++    // 2. tmp write - crossplatform
++    if (configOptions['--allow-fs-tmp'] === true) {
++      delete configOptions['--allow-fs-tmp']
++      if (configOptions['--allow-fs-write']) {
++        if (typeof configOptions['--allow-fs-write'] === 'string') {
++          configOptions['--allow-fs-write'] = [
++            configOptions['--allow-fs-write'],
++          ]
++        }
++        if (configOptions['--allow-fs-write'] === true) {
++          return // none of this matters
++        }
++      } else {
++        // do this for both undefined and false
++        configOptions['--allow-fs-write'] = []
++      }
++      const tmp = tmpdir()
++      configOptions['--allow-fs-write'].push(tmp)
++      // because macos is being weird
++      const tmpRealPath = realpathSync(tmp)
++      if (tmpRealPath !== tmp) {
++        configOptions['--allow-fs-write'].push(tmpRealPath)
++      }
++    }
++  }
++
++  /** @param {ConfigOptions} configOptions */
++  function makeFlagsFromConfig(configOptions) {
++    return Object.entries(configOptions)
++      .map(([arg, value]) => {
++        if (typeof value === 'boolean') {
++          return value ? arg : ''
++        } else if (Array.isArray(value)) {
++          return value.map((v) => `${arg}="${v}"`).join(' ')
++        } else {
++          return `${arg}="${value}"`
++        }
++      })
++      .filter(Boolean)
++      .join(' ')
++  }
++
++  /**
++   * Checks the config obtained from package.json and puts it in as NODE_OPTIONS
++   *
++   * @param {string | undefined} existingOptions
++   * @param {ConfigOptions} configOptions
++   * @param {NodeJS.ProcessEnv} env
++   */
++  function installNodeOptions(existingOptions, configOptions, env) {
++    if (!configOptions) {
++      return existingOptions || ''
++    }
++
++    customizePermissionsConfig(configOptions, env)
++
++    permissionsModelCompatibilityExtensions(configOptions, env)
++
++    const confOption = makeFlagsFromConfig(configOptions)
++
++    return `${existingOptions || ''} ${confOption.trim()}`.trim()
++  }
++
++  /**
++   * Filter environment variables based on ban keywords
++   *
++   * @param {NodeJS.ProcessEnv} env
++   * @param {string} lavamoatDir
++   * @returns {NodeJS.ProcessEnv}
++   */
++  function filterEnv(env, lavamoatDir) {
++    const banFilePath = pathJoin(lavamoatDir, '.env.ban.json')
++    let banConfig
++
++    try {
++      banConfig = readJsonFile(banFilePath)
++    } catch (err) {
++      const message = err instanceof Error ? err.message : String(err)
++      console.error(
++        `[LavaMoat] Warning: Failed to read .env.ban.json: ${message}.`
++      )
++      return env
++    }
++    let banKeywords = []
++    try {
++      if (Array.isArray(banConfig)) {
++        banKeywords.push(...banConfig)
++      } else {
++        throw Error(`Expected .env.ban.json to contain an array of keywords`)
++      }
++    } catch (err) {
++      const message = err instanceof Error ? err.message : String(err)
++      console.error(
++        `[LavaMoat] Warning: Failed to read .env.ban.json: ${message}.`
++      )
++      return env
++    }
++
++    /** @type {NodeJS.ProcessEnv} */
++    const filteredEnv = {}
++    const bannedEnv = []
++    banKeywords = banKeywords.map((keyword) => keyword.toLowerCase())
++    for (const [key, value] of Object.entries(env)) {
++      if (
++        !key.toLowerCase().startsWith('npm_config') &&
++        banKeywords.some((keyword) => key.toLowerCase().includes(keyword))
++      ) {
++        bannedEnv.push(key)
++      } else {
++        filteredEnv[key] = value
++      }
++    }
++    if (bannedEnv.length > 0) {
++      console.error(
++        `[LavaMoat] Warning: The following environment variables were banned: ${bannedEnv.join(', ')}`
++      )
++    }
++    return filteredEnv
++  }
++
++  /** @param {string} PATH */
++  function envPathOpinions(PATH) {
++    const pathFragments = PATH.split(pathDelimiter)
++    // This is to eliminate bin confusion attacks.
++    // Find node_modules/.bin and remove it, put it on the end that gets looked up last when looking for a name in the path.
++
++    /** @type {string[]} */
++    const filteredFragments = []
++    /** @type {string[]} */
++    const nodeModulesBinFragments = []
++
++    for (const fragment of pathFragments) {
++      if (pathBinMatcher(fragment)) {
++        nodeModulesBinFragments.push(fragment)
++      } else {
++        filteredFragments.push(fragment)
++      }
++    }
++    // Why would there be multiple bin fragments? In a npm workspace, local bin and workspace root bin is added
++    filteredFragments.push(...nodeModulesBinFragments)
++    return filteredFragments.join(pathDelimiter)
++  }
++
++  return {
++    processEnv: (existingEnv) => {
++      const scriptsConfig = readScriptsConfig(projectRoot)
++      const config = readConfig({
++        scriptsConfig,
++        scriptName,
++        projectRoot,
++      })
++
++      // Smell: Windows environment variables are case-insensitive, but Node's process.env
++      // might expose it as 'Path' instead of 'PATH'. Checking both ensures it doesn't get wiped out.
++
++      const existingPath = existingEnv.PATH || existingEnv.Path || ''
++
++      const lavamoatDir = pathJoin(projectRoot, 'lavamoat')
++
++      const fixedEnv = {
++        ...filterEnv(existingEnv, lavamoatDir),
++        PATH: envPathOpinions(existingPath),
++        NODE_OPTIONS: installNodeOptions(
++          existingEnv.NODE_OPTIONS,
++          config.nodeOptions,
++          existingEnv
++        ),
++      }
++      return fixedEnv
++    },
++  }
++}
++
++
+diff --git a/examples/project-vulnerable/lavamoat/scripts.npm.json b/examples/project-vulnerable/lavamoat/scripts.npm.json
+new file mode 100644
+index 0000000..0fdffc4
+--- /dev/null
++++ b/examples/project-vulnerable/lavamoat/scripts.npm.json
+@@ -0,0 +1,15 @@
++{
++  "notes": "Denies all capabilities except reading locations and spawning processes which `npm run *` will do. Apply this to scripts that compose multiple other scripts cleanly.",
++  "nodeOptions": {
++    "--permission": true,
++    "--allow-fs-read": ["/", "$npm_config_prefix", "$npm_config_userconfig"],
++    "--allow-fs-tmp": true,
++    "--allow-child-process": true,
++    "--allow-net": false,
++    "--allow-worker": false,
++    "--allow-addons": false,
++    "--allow-wasi": false,
++    "--allow-inspector": false,
++    "--disable-warning": "SecurityWarning"
++  }
++}
+diff --git a/examples/project-vulnerable/lavamoat/scripts.online.json b/examples/project-vulnerable/lavamoat/scripts.online.json
+new file mode 100644
+index 0000000..bd78458
+--- /dev/null
++++ b/examples/project-vulnerable/lavamoat/scripts.online.json
+@@ -0,0 +1,15 @@
++{
++  "notes": "Denies all powerful IO capabilities that a linter script should not need. If a script needs more permissions, copy this file and edit.",
++  "nodeOptions": {
++    "--permission": true,
++    "--allow-fs-read": ["/", "$npm_config_prefix", "$npm_config_userconfig"],
++    "--allow-fs-write": ["./"],
++    "--allow-fs-tmp": true,
++    "--allow-child-process": false,
++    "--allow-net": true,
++    "--allow-worker": false,
++    "--allow-addons": false,
++    "--allow-wasi": false,
++    "--allow-inspector": false
++  }
++}
+diff --git a/examples/project-vulnerable/lavamoat/scripts.strict.json b/examples/project-vulnerable/lavamoat/scripts.strict.json
+new file mode 100644
+index 0000000..a79eb78
+--- /dev/null
++++ b/examples/project-vulnerable/lavamoat/scripts.strict.json
+@@ -0,0 +1,15 @@
++{
++  "notes": "Denies all powerful IO capabilities that a linter script should not need. If a script needs more permissions, copy this file and edit.",
++  "nodeOptions": {
++    "--permission": true,
++    "--allow-fs-read": ["/", "$npm_config_prefix", "$npm_config_userconfig"],
++    "--allow-fs-write": ["./"],
++    "--allow-fs-tmp": true,
++    "--allow-child-process": false,
++    "--allow-net": false,
++    "--allow-worker": false,
++    "--allow-addons": false,
++    "--allow-wasi": false,
++    "--allow-inspector": false
++  }
++}
+diff --git a/examples/project-vulnerable/package.json b/examples/project-vulnerable/package.json
+index 5b185a0..d745c10 100644
+--- a/examples/project-vulnerable/package.json
++++ b/examples/project-vulnerable/package.json
+@@ -12,6 +12,13 @@
+     "test:unit": "echo 'unit test pass' && (is-online; true) ",
+     "test:online": "echo 'online tests' && is-online"
+   },
++  "scriptsConfig": {
++    "#default": "lavamoat/scripts.strict.json",
++    "test": "lavamoat/scripts.npm.json",
++    "deploy": "lavamoat/scripts.npm.json",
++    "test:online": "lavamoat/scripts.online.json",
++    "deploy:publish": "lavamoat/scripts.online.json"
++  },
+   "keywords": [],
+   "type": "commonjs",
+   "devDependencies": {
+@@ -27,5 +34,15 @@
+     "bcrypt": "^6.0.0",
+     "eslint": "^10.8.1",
+     "is-online-cli": "^7.0.0"
++  },
++  "devEngines": {
++    "packageManager": {
++      "name": "npm",
++      "version": ">=11.17.0",
++      "onFail": "error"
++    }
++  },
++  "allowScripts": {
++    "bcrypt@6.0.0": true
+   }
+-}
+\ No newline at end of file
++}
