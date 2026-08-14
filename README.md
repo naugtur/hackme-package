@@ -21,3 +21,6 @@ The goal of this repository is not to show things are dangerous, but prove secur
 
 **Use [@lavamoat/harden](https://lavamoat.github.io/guides/harden/) to configure your project.**
 
+### Example
+
+See the `examples/project-vulnerable` project for a demonstration of how supply chain attacks can be executed. You can try out `@lavamoat/harden` and experiment with setting the permissions yourself, or apply the patch in `examples/project-vulnerable/mitigation/fix.patch` to see the complete setup.
