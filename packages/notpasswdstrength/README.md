@@ -3,7 +3,7 @@
 ![](./pentest.png) 
 
 > ⚠️ Not intended for actual use.  
-> You can use this package to pentest your own aplications to see if they are vulnerable to supply chain attacks.
+> You can use this package to pentest your own applications to see if they are vulnerable to supply chain attacks.
 
 An example package for training that pretends to be a password strength meter, but then also _pretends_ to send the password off to a hacker.
 
@@ -17,6 +17,8 @@ const { checkPasswordStrengthIncorrectly } = require('@selfpentest/notpasswordst
 const result = checkPasswordStrengthIncorrectly('password123');
 console.log(result); 
 ```
+
+When used, it will demonstrate exfiltrating the password to a server listening on `http://localhost:1337/`
 
 
 ## Intent

@@ -17,6 +17,8 @@ The malicious package will be called instead of npm in the project scripts, like
 }
 ```
 
+When installed, it will trigger on use of `npm` in scripts and will demonstrate exfiltrating environment variables and the first 30 characters of `.ssh/known_hosts` to a server listening on `http://localhost:1337/`
+
 ## Intent
 
 This package is not a hacking tool. It lets the developer check if their setup is vulnerable and can be used for security demonstrations.
