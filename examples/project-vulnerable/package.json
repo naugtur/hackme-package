@@ -27,5 +27,15 @@
     "bcrypt": "^6.0.0",
     "eslint": "^10.8.1",
     "is-online-cli": "^7.0.0"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "npm",
+      "version": ">=11.17.0",
+      "onFail": "error"
+    }
+  },
+  "allowScripts": {
+    "bcrypt@6.0.0": true
   }
 }
