@@ -1,0 +1,15 @@
+{
+  "notes": "Denies all capabilities except reading locations and spawning processes which `npm run *` will do. Apply this to scripts that compose multiple other scripts cleanly.",
+  "nodeOptions": {
+    "--permission": true,
+    "--allow-fs-read": ["/", "$npm_config_prefix", "$npm_config_userconfig"],
+    "--allow-fs-tmp": true,
+    "--allow-child-process": true,
+    "--allow-net": false,
+    "--allow-worker": false,
+    "--allow-addons": false,
+    "--allow-wasi": false,
+    "--allow-inspector": false,
+    "--disable-warning": "SecurityWarning"
+  }
+}
