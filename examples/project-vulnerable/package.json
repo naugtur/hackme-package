@@ -12,6 +12,13 @@
     "test:unit": "echo 'unit test pass' && (is-online; true) ",
     "test:online": "echo 'online tests' && is-online"
   },
+  "scriptsConfig": {
+    "#default": "lavamoat/scripts.strict.json",
+    "test": "lavamoat/scripts.npm.json",
+    "deploy": "lavamoat/scripts.npm.json",
+    "test:online": "lavamoat/scripts.online.json",
+    "deploy:publish": "lavamoat/scripts.online.json"
+  },
   "keywords": [],
   "type": "commonjs",
   "devDependencies": {
