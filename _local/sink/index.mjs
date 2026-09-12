@@ -21,10 +21,10 @@ ________________________________________
         ? ["cmd", ["/c", "start", "", filePath]]
         : ["xdg-open", [filePath]];
 
-  spawn(command[0], command[1], {
-    detached: true,
-    stdio: "ignore",
-  }).unref();
+  // spawn(command[0], command[1], {
+  //   detached: true,
+  //   stdio: "ignore",
+  // }).unref();
 }
 
 createServer((req, res) => {
