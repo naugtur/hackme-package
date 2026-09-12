@@ -1,0 +1,9 @@
+{
+  "resources": {
+    "@selfpentest/notpasswdstrength": {
+      "globals": {
+        "fetch": true
+      }
+    }
+  }
+}

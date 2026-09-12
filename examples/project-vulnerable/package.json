@@ -22,6 +22,7 @@
   "keywords": [],
   "type": "commonjs",
   "devDependencies": {
+    "@lavamoat/webpack": "^2.3.0",
     "@selfpentest/bin-confusion": "^1.0.0",
     "@selfpentest/bundled-lies": "^1.0.0",
     "@selfpentest/eslint-pentest-plugin": "^1.0.0",
@@ -29,11 +30,11 @@
     "@selfpentest/webpack-plugin": "^1.0.0"
   },
   "dependencies": {
-    "webpack": "^5.0.0",
-    "webpack-cli": "^5.0.0",
     "bcrypt": "^6.0.0",
     "eslint": "^10.8.1",
-    "is-online-cli": "^7.0.0"
+    "is-online-cli": "^7.0.0",
+    "webpack": "^5.0.0",
+    "webpack-cli": "^5.0.0"
   },
   "devEngines": {
     "packageManager": {
