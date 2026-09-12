@@ -7,7 +7,7 @@
     "--allow-fs-tmp": true,
     "--allow-child-process": false,
     "--allow-net": false,
-    "--allow-worker": false,
+    "--allow-worker": true,
     "--allow-addons": false,
     "--allow-wasi": false,
     "--allow-inspector": false
