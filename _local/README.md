@@ -13,4 +13,6 @@ htpasswd contains one user
 
 ## Sink server
 
-The sink server will print to the console but also open captured payloads in your default text file viewer app, if it can.
+The `demo-cc` server will print the captured payloads 
+
+Remove `--headless` if you want them to pop up in your default text editor.

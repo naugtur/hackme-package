@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # start the sink server for demonstrating hacks
-node ./sink/index.mjs &
+node ../packages/demo-cc/index.mjs --headless &
 
 # Install verdaccio globally if not installed
 if ! command -v verdaccio &> /dev/null; then
