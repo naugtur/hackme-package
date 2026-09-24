@@ -18,4 +18,6 @@ Use `npx @selfpentest/demo-cc` to run the local HTTP server that will receive an
 
 ## Intent
 
-This package is not a hacking tool. It lets the developer check if their build is vulnerable without making the upfront effort to learn about the supply chain with postinstall scripts. All it does is print a warning. Hopefully a convincing one :)
+This package is not a hacking tool. It lets the developer check if their build is vulnerable without making the upfront effort to learn about the supply chain. All it does is print a warning. Hopefully a convincing one :)
+
+It serves as a test case for educational purposes and practicing preventing supply chain attacks in a controlled environment.

@@ -1,14 +1,17 @@
 {
   "name": "@selfpentest/webpack-plugin",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "index.js",
   "publishConfig": {
     "access": "public"
+  },
+  "contentPolicy": {
+    "class": "dual-use"
   },
   "scripts": {
     "test": "echo boop"
   },
   "author": "selfpentest",
   "license": "MIT",
-  "description": "An example package for training oneself that pretends to be a webpack plugin but it steals secrets instead"
+  "description": "An example package for training oneself that is webpack plugin but it pretends to exfiltrate information"
 }

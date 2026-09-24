@@ -1,0 +1,5 @@
+The package may appear as a hacking tool of malware, but it is neither.
+
+It is only useful for educational purposes.
+
+There is no way to reasonably use it for actual penetration testing, it demonstrates a supply-chain security concept for educational purposes and deliberately hardcodes a choice of useless values as demonstration data to send to a hardcoded localhost url. 
