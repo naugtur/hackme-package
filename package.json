@@ -6,7 +6,8 @@
   ],
   "scripts": {
     "publish:all": "bash scripts/publish-staged.sh",
-    "bump:all": "bash scripts/bump.sh"
+    "bump:all": "bash scripts/bump.sh",
+    "v:all": "bash scripts/v.sh"
   },
   "devEngines": {
     "packageManager": {
