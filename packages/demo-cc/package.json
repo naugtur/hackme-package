@@ -1,0 +1,22 @@
+{
+  "name": "@selfpentest/demo-cc",
+  "version": "1.0.0",
+  "description": "A local server to demonstrate the pretended attacks of other selfpentest packages",
+  "bin": "index.mjs",
+  "scripts": {
+    "start": "node index.mjs --popup=false",
+    "test": "demo-cc --once & sleep 1 && curl http://localhost:1337/works",
+    "test:headless": "demo-cc --headless --once & sleep 1 && curl http://localhost:1337/works"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/naugtur/hackme-package.git"
+  },
+  "keywords": [],
+  "author": "naugtur <naugtur@gmail.com>",
+  "license": "Apache2.0",
+  "bugs": {
+    "url": "https://github.com/naugtur/hackme-package/issues"
+  },
+  "homepage": "https://github.com/naugtur/hackme-package#readme"
+}

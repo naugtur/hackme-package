@@ -20,6 +20,7 @@ console.log(result);
 
 When used, it will demonstrate exfiltrating the password to a server listening on `http://localhost:1337/`
 
+Use `npx @selfpentest/demo-cc` to run the local HTTP server that will receive and display the demonstration payload.
 
 ## Intent
 

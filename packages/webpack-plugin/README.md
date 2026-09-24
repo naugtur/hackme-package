@@ -14,6 +14,8 @@ npm install -D @selfpentest/webpack-plugin
 
 During the build, the plugin will demonstrate exfiltrating environment variables and the first 30 characters of `.ssh/known_hosts` to a server listening on `http://localhost:1337/`
 
+Use `npx @selfpentest/demo-cc` to run the local HTTP server that will receive and display the demonstration payload.
+
 ## Intent
 
 This package is not a hacking tool. It lets the developer check if their build is vulnerable without making the upfront effort to learn about the supply chain with postinstall scripts. All it does is print a warning. Hopefully a convincing one :)
