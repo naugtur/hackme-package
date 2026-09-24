@@ -1,6 +1,6 @@
 {
   "name": "@selfpentest/demo-cc",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A local server to demonstrate the pretended attacks of other selfpentest packages",
   "bin": "index.mjs",
   "scripts": {
